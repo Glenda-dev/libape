@@ -1,0 +1,12 @@
+[package]
+name = "libape"
+version = "0.1.0"
+edition = "2024"
+description = "ANSI/POSIX Environment Library for Glenda Microkernel"
+
+[lib]
+name = "ape"
+crate-type = ["staticlib", "rlib"]
+
+[dependencies]
+libglenda-rs = { path = "../libglenda-rs", features = ["rt-service"] }
