@@ -8,7 +8,7 @@ impl LinuxTimeService for ApeService {
     }
 }
 
-use crate::metadata;
+use crate::version;
 
 impl LinuxMiscService for ApeService {
     fn sys_uname(&self, buf: *mut u8) -> isize {
@@ -35,12 +35,12 @@ impl LinuxMiscService for ApeService {
             core::ptr::copy_nonoverlapping(s.as_ptr(), dest, len);
         };
 
-        fill_field(0, metadata::SYSNAME); // sysname
-        fill_field(1, metadata::NODENAME); // nodename
-        fill_field(2, metadata::RELEASE); // release
-        fill_field(3, metadata::VERSION); // version
-        fill_field(4, metadata::MACHINE); // machine
-        fill_field(5, metadata::DOMAINNAME); // domainname
+        fill_field(0, version::SYSNAME); // sysname
+        fill_field(1, version::NODENAME); // nodename
+        fill_field(2, version::RELEASE); // release
+        fill_field(3, version::VERSION); // version
+        fill_field(4, version::MACHINE); // machine
+        fill_field(5, version::DOMAINNAME); // domainname
 
         0
     }

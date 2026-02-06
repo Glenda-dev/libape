@@ -5,8 +5,8 @@
 extern crate alloc;
 
 mod ape;
-mod metadata;
 mod syscall;
+mod version;
 
 use crate::ape::ApeService;
 use glenda::interface::linux::*;
