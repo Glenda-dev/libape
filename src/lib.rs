@@ -2,6 +2,8 @@
 #![allow(dead_code)]
 #![allow(unused)]
 
+extern crate alloc;
+
 mod ape;
 mod metadata;
 mod syscall;

@@ -1,7 +1,7 @@
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::sync::Arc;
-use glenda::sync::Mutex;
+use spin::Mutex;
 
 pub struct FileHandle {
     // Placeholder for file handle details

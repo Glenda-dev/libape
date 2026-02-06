@@ -11,3 +11,4 @@ crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 libglenda-rs = { path = "../libglenda-rs", features = ["rt-service"] }
+spin = "0.10.0"
