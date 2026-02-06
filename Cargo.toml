@@ -3,6 +3,7 @@ name = "libape"
 version = "0.1.0"
 edition = "2024"
 description = "ANSI/POSIX Environment Library for Glenda Microkernel"
+build = "build.rs"
 
 [lib]
 name = "ape"
