@@ -5,6 +5,7 @@
 extern crate alloc;
 
 mod ape;
+mod runtime;
 mod syscall;
 mod version;
 
@@ -15,7 +16,7 @@ use glenda::protocol::linux::*; // Imports all Linux*Service traits
 static SERVICE: ApeService = ApeService::new();
 
 #[unsafe(no_mangle)]
-pub extern "C" fn __glenda_syscall_dispatch(
+pub extern "C" fn __libape_syscall_dispatch(
     n: isize,
     a1: isize,
     a2: isize,
@@ -73,4 +74,9 @@ pub extern "C" fn __glenda_syscall_dispatch(
         SYS_PRLIMIT64 => SERVICE.sys_prlimit64(u1, u2, u3 as *const u8, u4 as *mut u8),
         _ => -ENOSYS,
     }
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn __libape_init() {
+    runtime::init()
 }
