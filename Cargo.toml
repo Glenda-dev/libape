@@ -12,7 +12,5 @@ crate-type = ["staticlib", "rlib"]
 [dependencies]
 libglenda-rs = { path = "../libglenda-rs", features = ["rt-service"] }
 spin = "0.10.0"
-buddy_system_allocator = "0.9"
-
 [build-dependencies]
 chrono = "0.4"
