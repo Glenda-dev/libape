@@ -1,17 +1,21 @@
 use alloc::collections::BTreeMap;
 use alloc::string::String;
 use alloc::sync::Arc;
+use glenda::client::{FsClient, ProcessClient, ResourceClient};
+use glenda::sys::MONITOR_CAP;
 use spin::Mutex;
 
 pub struct FileHandle {
-    // Placeholder for file handle details
     pub cap_idx: usize,
-    pub offset: usize,
+    pub offset: u64,
 }
 
 pub struct ApeService {
     pub cwd: Mutex<String>,
     pub fds: Mutex<BTreeMap<usize, FileHandle>>,
+    pub fs: Mutex<FsClient>,
+    pub proc: Mutex<ProcessClient>,
+    pub res: Mutex<ResourceClient>,
 }
 
 impl ApeService {
@@ -19,7 +23,13 @@ impl ApeService {
     // String::new() is const
     // Mutex::new() is likely const (spin::Mutex)
     pub const fn new() -> Self {
-        Self { cwd: Mutex::new(String::new()), fds: Mutex::new(BTreeMap::new()) }
+        Self {
+            cwd: Mutex::new(String::new()),
+            fds: Mutex::new(BTreeMap::new()),
+            fs: Mutex::new(FsClient::new(MONITOR_CAP)),
+            proc: Mutex::new(ProcessClient::new(MONITOR_CAP)),
+            res: Mutex::new(ResourceClient::new(MONITOR_CAP)),
+        }
     }
 }
 
