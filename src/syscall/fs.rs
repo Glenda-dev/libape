@@ -1,6 +1,7 @@
 use crate::ApeService;
 use crate::ape::FileHandle;
 use glenda::cap::{CapPtr, Endpoint};
+use glenda::client::FsClient;
 use glenda::interface::linux::LinuxFileSystemService;
 use glenda::interface::{FileHandleService, FileSystemService, PipeService};
 use glenda::protocol::fs::OpenFlags;

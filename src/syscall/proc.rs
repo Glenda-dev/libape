@@ -1,5 +1,7 @@
 use crate::ApeService;
+use glenda::interface::ProcessService;
 use glenda::interface::linux::LinuxProcessService;
+use glenda::ipc::Badge;
 use glenda::protocol::linux::*;
 use glenda::sys;
 
@@ -18,7 +20,7 @@ impl LinuxProcessService for ApeService {
 
     fn sys_getpid(&self) -> isize {
         let mut proc = self.proc.lock();
-        proc.get_pid().unwrap_or(1) as isize
+        proc.get_pid(Badge::null()).unwrap_or(0) as isize
     }
 
     fn sys_getppid(&self) -> isize {
