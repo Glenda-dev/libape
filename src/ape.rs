@@ -1,9 +1,8 @@
 use alloc::collections::BTreeMap;
 use alloc::string::String;
-use alloc::sync::Arc;
 use glenda::client::{FsClient, ProcessClient, ResourceClient};
+use glenda::sync::mutex::Mutex;
 use glenda::sys::MONITOR_CAP;
-use spin::Mutex;
 
 pub struct FileHandle {
     pub cap_idx: usize,
