@@ -283,12 +283,14 @@ impl ApeService {
             *s.add(8) = stat.blocks as u64;
 
             let ts = buf.add(72) as *mut i64;
+            /*
             *ts.add(0) = stat.atime_sec;
             *ts.add(1) = stat.atime_nsec;
             *ts.add(2) = stat.mtime_sec;
             *ts.add(3) = stat.mtime_nsec;
             *ts.add(4) = stat.ctime_sec;
             *ts.add(5) = stat.ctime_nsec;
+            */
         }
     }
 }
