@@ -14,7 +14,7 @@ impl LinuxMemoryService for ApeService {
             match sys::sbrk(0) {
                 Ok(current) => {
                     if brk > current {
-                        match sys::sbrk(brk - current) {
+                        match sys::sbrk((brk - current) as isize) {
                             Ok(new_addr) => new_addr as isize,
                             Err(_) => -ENOMEM,
                         }

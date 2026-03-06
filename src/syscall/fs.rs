@@ -4,6 +4,7 @@ use glenda::cap::{CapPtr, Endpoint};
 use glenda::client::FsClient;
 use glenda::interface::linux::LinuxFileSystemService;
 use glenda::interface::{FileHandleService, FileSystemService, PipeService};
+use glenda::ipc::Badge;
 use glenda::protocol::fs::OpenFlags;
 use glenda::protocol::linux::*;
 
@@ -35,7 +36,7 @@ impl LinuxFileSystemService for ApeService {
             core::str::from_utf8_unchecked(core::slice::from_raw_parts(path, len))
         };
         let mut fs = self.fs.lock();
-        match fs.mkdir(path_str, mode as u32) {
+        match fs.mkdir(Badge::null(), path_str, mode as u32) {
             Ok(_) => 0,
             Err(_) => -EACCES,
         }
@@ -49,7 +50,7 @@ impl LinuxFileSystemService for ApeService {
             core::str::from_utf8_unchecked(core::slice::from_raw_parts(path, len))
         };
         let mut fs = self.fs.lock();
-        match fs.unlink(path_str) {
+        match fs.unlink(Badge::null(), path_str) {
             Ok(_) => 0,
             Err(_) => -ENOENT,
         }
@@ -78,7 +79,7 @@ impl LinuxFileSystemService for ApeService {
 
         let mut fs = self.fs.lock();
         let glenda_flags = OpenFlags::from_bits_truncate(flags);
-        match fs.open(path_str, glenda_flags, mode as u32) {
+        match fs.open(Badge::null(), path_str, glenda_flags, mode as u32) {
             Ok(cap_idx) => {
                 let mut fds = self.fds.lock();
                 let fd = fds.keys().last().map(|k| k + 1).unwrap_or(3);
@@ -93,7 +94,7 @@ impl LinuxFileSystemService for ApeService {
         if let Some(handle) = fds.remove(&fd) {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
-            let _ = file_client.close();
+            let _ = file_client.close(Badge::null());
             0
         } else {
             -EBADF
@@ -101,7 +102,7 @@ impl LinuxFileSystemService for ApeService {
     }
     fn sys_pipe2(&self, pipefd: *mut i32, _flags: usize) -> isize {
         let mut fs = self.fs.lock();
-        match fs.pipe() {
+        match fs.pipe(Badge::null()) {
             Ok((read_cap, write_cap)) => {
                 let mut fds = self.fds.lock();
                 let fd1 = fds.keys().last().map(|k| k + 1).unwrap_or(3);
@@ -122,7 +123,7 @@ impl LinuxFileSystemService for ApeService {
         if let Some(handle) = fds.get_mut(&fd) {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
-            match file_client.getdents(count / 264) {
+            match file_client.getdents(Badge::null(), count / 264) {
                 // Approximate number of entries based on max size
                 Ok(entries) => {
                     let mut offset = 0;
@@ -160,7 +161,7 @@ impl LinuxFileSystemService for ApeService {
         if let Some(handle) = fds.get_mut(&fd) {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
-            match file_client.seek(offset as i64, whence) {
+            match file_client.seek(Badge::null(), offset as i64, whence) {
                 Ok(new_offset) => {
                     handle.offset = new_offset;
                     new_offset as isize
@@ -178,7 +179,7 @@ impl LinuxFileSystemService for ApeService {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
             let slice = unsafe { core::slice::from_raw_parts_mut(buf, count) };
-            match file_client.read(handle.offset, slice) {
+            match file_client.read(Badge::null(), handle.offset, slice) {
                 Ok(n) => {
                     handle.offset += n as u64;
                     n as isize
@@ -204,7 +205,7 @@ impl LinuxFileSystemService for ApeService {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
             let slice = unsafe { core::slice::from_raw_parts(buf, count) };
-            match file_client.write(handle.offset, slice) {
+            match file_client.write(Badge::null(), handle.offset, slice) {
                 Ok(n) => {
                     handle.offset += n as u64;
                     n as isize
@@ -240,7 +241,7 @@ impl LinuxFileSystemService for ApeService {
             core::str::from_utf8_unchecked(core::slice::from_raw_parts(path, len))
         };
         let mut fs = self.fs.lock();
-        match fs.stat_path(path_str) {
+        match fs.stat_path(Badge::null(), path_str) {
             Ok(stat) => {
                 self.fill_linux_stat(&stat, statbuf);
                 0
@@ -253,7 +254,7 @@ impl LinuxFileSystemService for ApeService {
         if let Some(handle) = fds.get_mut(&fd) {
             let cap = CapPtr::from(handle.cap_idx);
             let mut file_client = FsClient::new(Endpoint::from(cap));
-            match file_client.stat() {
+            match file_client.stat(Badge::null()) {
                 Ok(stat) => {
                     self.fill_linux_stat(&stat, statbuf);
                     0
@@ -284,13 +285,13 @@ impl ApeService {
 
             let ts = buf.add(72) as *mut i64;
             /*
-            *ts.add(0) = stat.atime_sec;
-            *ts.add(1) = stat.atime_nsec;
-            *ts.add(2) = stat.mtime_sec;
-            *ts.add(3) = stat.mtime_nsec;
-            *ts.add(4) = stat.ctime_sec;
-            *ts.add(5) = stat.ctime_nsec;
-            */
+             *ts.add(0) = stat.atime_sec;
+             *ts.add(1) = stat.atime_nsec;
+             *ts.add(2) = stat.mtime_sec;
+             *ts.add(3) = stat.mtime_nsec;
+             *ts.add(4) = stat.ctime_sec;
+             *ts.add(5) = stat.ctime_nsec;
+             */
         }
     }
 }
