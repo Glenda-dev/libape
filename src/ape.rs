@@ -6,7 +6,7 @@ use glenda::sync::mutex::Mutex;
 
 pub struct FileHandle {
     pub cap_idx: usize,
-    pub offset: u64,
+    pub offset: usize,
 }
 
 pub struct ApeService {

@@ -135,7 +135,7 @@ impl LinuxFileSystemService for ApeService {
                         }
                         unsafe {
                             let curr = dirp.add(offset);
-                            *(curr as *mut u64) = entry.d_ino;
+                            *(curr as *mut usize) = entry.d_ino;
                             *(curr.add(8) as *mut i64) = (offset + reclen) as i64;
                             *(curr.add(16) as *mut u16) = reclen as u16;
                             *(curr.add(18) as *mut u8) = entry.d_type;
@@ -181,7 +181,7 @@ impl LinuxFileSystemService for ApeService {
             let slice = unsafe { core::slice::from_raw_parts_mut(buf, count) };
             match file_client.read(Badge::null(), handle.offset, slice) {
                 Ok(n) => {
-                    handle.offset += n as u64;
+                    handle.offset += n;
                     n as isize
                 }
                 Err(_) => -EIO,
@@ -207,7 +207,7 @@ impl LinuxFileSystemService for ApeService {
             let slice = unsafe { core::slice::from_raw_parts(buf, count) };
             match file_client.write(Badge::null(), handle.offset, slice) {
                 Ok(n) => {
-                    handle.offset += n as u64;
+                    handle.offset += n;
                     n as isize
                 }
                 Err(_) => -EIO,
@@ -270,7 +270,7 @@ impl LinuxFileSystemService for ApeService {
 impl ApeService {
     fn fill_linux_stat(&self, stat: &glenda::protocol::fs::Stat, buf: *mut u8) {
         unsafe {
-            let s = buf as *mut u64;
+            let s = buf as *mut usize;
             *s.add(0) = stat.dev;
             *s.add(1) = stat.ino;
             *(buf.add(16) as *mut u32) = stat.mode;
@@ -281,7 +281,7 @@ impl ApeService {
             *s.add(5) = 0; // __pad
             *s.add(6) = stat.size;
             *(buf.add(56) as *mut i32) = stat.blksize as i32;
-            *s.add(8) = stat.blocks as u64;
+            *s.add(8) = stat.blocks;
 
             let ts = buf.add(72) as *mut i64;
             /*
