@@ -1,6 +1,5 @@
 use crate::client::ApeClient;
-use crate::sys::constants::*;
-
+use linux_raw_sys::errno::*;
 #[unsafe(no_mangle)]
 pub extern "C" fn __libape_syscall_dispatch(
     n: usize,
@@ -14,6 +13,6 @@ pub extern "C" fn __libape_syscall_dispatch(
     let client = ApeClient::new();
     match client.invoke_syscall(n, [a, b, c, d, e, f]) {
         Ok(ret) => ret,
-        Err(_) => -ENOSYS,
+        Err(_) => -(ENOSYS as isize),
     }
 }

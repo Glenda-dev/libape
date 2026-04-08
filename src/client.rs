@@ -2,7 +2,6 @@ use crate::cap::APE_CAP;
 use glenda::cap::Endpoint;
 use glenda::error::Error;
 use glenda::ipc::{MsgFlags, MsgTag, UTCB};
-
 pub struct ApeClient {
     ep: Endpoint,
 }
@@ -14,10 +13,9 @@ impl ApeClient {
 
     pub fn invoke_syscall(&self, sys_num: usize, args: [usize; 6]) -> Result<isize, Error> {
         let mut utcb = unsafe { UTCB::new() };
-        utcb.set_mr(0, sys_num);
-        for i in 0..6 {
-            utcb.set_mr(i + 1, args[i]);
-        }
+        utcb.clear();
+        // 按 nabcdef( + 0 填充第 8 个 MR )的顺序写入，和 kernel fault 转发格式保持一致。
+        set_mrs!(&mut utcb, sys_num, args[0], args[1], args[2], args[3], args[4], args[5], 0usize);
         let tag = MsgTag::new(
             glenda::protocol::KERNEL_PROTO,
             glenda::protocol::kernel::SYSCALL,

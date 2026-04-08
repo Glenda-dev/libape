@@ -10,9 +10,11 @@ name = "ape"
 crate-type = ["staticlib", "rlib"]
 
 [dependencies]
-libglenda-rs = { path = "../libglenda-rs", features = [
-    "rt-service",
-    "no-start",
+libglenda-rs = { path = "../libglenda-rs" }
+linux-raw-sys = { version = "0.12.1", default-features = false, features = [
+    "no_std",
+    "errno",
+    "general",
 ] }
 num_enum = { version = "0.7.5", default-features = false }
 
@@ -20,4 +22,4 @@ num_enum = { version = "0.7.5", default-features = false }
 chrono = "0.4"
 
 [features]
-runtime = []
+runtime = ["libglenda-rs/no-start", "libglenda-rs/rt-app"]
