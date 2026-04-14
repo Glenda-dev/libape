@@ -6,12 +6,19 @@
 extern crate glenda;
 extern crate alloc;
 
-pub mod ape;
-pub mod arch;
-pub mod cap;
-pub mod client;
 #[cfg(feature = "runtime")]
-pub mod runtime;
-pub mod sys;
-pub mod vdso;
-pub mod version;
+#[unsafe(no_mangle)]
+pub extern "C" fn __libape_init() {}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn __libape_syscall_dispatch(
+    n: usize,
+    a: usize,
+    b: usize,
+    c: usize,
+    d: usize,
+    e: usize,
+    f: usize,
+) -> isize {
+    -(linux_raw_sys::errno::ENOSYS as isize)
+}
