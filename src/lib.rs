@@ -16,6 +16,7 @@ pub mod policy;
 mod runtime;
 mod state;
 mod syscall;
+pub mod version;
 
 #[cfg(feature = "runtime")]
 #[unsafe(no_mangle)]
