@@ -7,8 +7,8 @@ use linux_raw_sys::errno::{EAGAIN, EINVAL, ENOSYS};
 use linux_raw_sys::general::{
     __NR_brk, __NR_chdir, __NR_chroot, __NR_futex, __NR_getcwd, __NR_getegid, __NR_geteuid,
     __NR_getgid, __NR_getpid, __NR_getppid, __NR_getrandom, __NR_gettid, __NR_getuid,
-    __NR_rt_sigpending, __NR_rt_sigprocmask, __NR_sched_yield, __NR_set_tid_address,
-    SIG_BLOCK, SIG_SETMASK, SIG_UNBLOCK,
+    __NR_rt_sigpending, __NR_rt_sigprocmask, __NR_sched_yield, __NR_set_tid_address, SIG_BLOCK,
+    SIG_SETMASK, SIG_UNBLOCK,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

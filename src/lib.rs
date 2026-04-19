@@ -8,8 +8,8 @@
 extern crate glenda;
 extern crate alloc;
 
-mod fallback;
 pub mod compat;
+mod fallback;
 mod mem;
 pub mod path;
 pub mod policy;
