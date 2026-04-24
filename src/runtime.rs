@@ -1,8 +1,9 @@
-use crate::state::{ApeProcessIds, ApeProcessState, RoutePolicy, RouteStats, SlowSyscallRequest};
+use crate::state::{ApeProcessIds, ApeProcessState};
 use core::cell::UnsafeCell;
 use core::hint::spin_loop;
 use core::ops::{Deref, DerefMut};
 use core::sync::atomic::{AtomicBool, Ordering};
+use glenda::cap::Endpoint;
 
 pub struct SpinMutex<T> {
     locked: AtomicBool,
@@ -81,11 +82,17 @@ impl ApeRuntime {
     }
 
     pub fn set_process_ids(&mut self, ids: ApeProcessIds) {
-        self.process.set_ids(ids);
+        if self.process.session_id == 0 {
+            self.process.session_id = ids.pid;
+        }
+        if self.process.process_group_id == 0 {
+            self.process.process_group_id = ids.pid;
+        }
+        self.process.ids = Some(ids);
     }
 
     pub fn process_ids(&self) -> Option<ApeProcessIds> {
-        self.process.ids()
+        self.process.ids
     }
 
     pub fn set_clear_child_tid(&mut self, ptr: usize) {
@@ -93,7 +100,10 @@ impl ApeRuntime {
     }
 
     pub fn set_identity(&mut self, uid: usize, euid: usize, gid: usize, egid: usize) {
-        self.process.set_identity(uid, euid, gid, egid);
+        self.process.identity.uid = uid as u32;
+        self.process.identity.euid = euid as u32;
+        self.process.identity.gid = gid as u32;
+        self.process.identity.egid = egid as u32;
     }
 
     pub fn set_memory_seed(
@@ -113,80 +123,12 @@ impl ApeRuntime {
         self.process.memory.mmap_limit = mmap_limit;
     }
 
-    pub fn set_route_policy(&mut self, policy: RoutePolicy, slow_enabled: bool, fallback: bool) {
-        self.process.set_route_config(policy, slow_enabled, fallback);
+    pub fn ape_endpoint(&self) -> Option<Endpoint> {
+        self.process.ape_endpoint
     }
 
-    pub fn route_policy(&self) -> RoutePolicy {
-        self.process.route_config.policy
-    }
-
-    pub fn slow_path_enabled(&self) -> bool {
-        self.process.route_config.slow_path_enabled
-    }
-
-    pub fn fallback_enabled(&self) -> bool {
-        self.process.route_config.fallback_enabled
-    }
-
-    pub fn register_service_thread(&mut self, tid: usize) {
-        self.process.service_tid = Some(tid);
-    }
-
-    pub fn service_tid(&self) -> Option<usize> {
-        self.process.service_tid
-    }
-
-    pub fn enqueue_slow_syscall(&mut self, sys_num: usize, args: [usize; 6]) -> Option<u64> {
-        let id = self.process.slow_queue.enqueue_request(sys_num, args);
-        if id.is_some() {
-            self.process.route_stats.slow_enqueued =
-                self.process.route_stats.slow_enqueued.saturating_add(1);
-        } else {
-            self.process.route_stats.queue_drops =
-                self.process.route_stats.queue_drops.saturating_add(1);
-        }
-        id
-    }
-
-    pub fn dequeue_slow_request(&mut self) -> Option<SlowSyscallRequest> {
-        self.process.slow_queue.dequeue_request()
-    }
-
-    pub fn complete_slow_syscall(&mut self, id: u64, ret: isize) -> bool {
-        self.process.slow_queue.push_result(id, ret)
-    }
-
-    pub fn take_slow_result(&mut self, id: u64) -> Option<isize> {
-        self.process.slow_queue.take_result(id)
-    }
-
-    pub fn pending_slow_len(&self) -> usize {
-        self.process.slow_queue.pending_len()
-    }
-
-    pub fn stats_snapshot(&self) -> RouteStats {
-        self.process.route_stats
-    }
-
-    pub fn mark_local_fast_hit(&mut self) {
-        self.process.route_stats.local_fast_hits =
-            self.process.route_stats.local_fast_hits.saturating_add(1);
-    }
-
-    pub fn mark_local_slow_hit(&mut self) {
-        self.process.route_stats.local_slow_hits =
-            self.process.route_stats.local_slow_hits.saturating_add(1);
-    }
-
-    pub fn mark_fallback_hit(&mut self) {
-        self.process.route_stats.fallback_hits =
-            self.process.route_stats.fallback_hits.saturating_add(1);
-    }
-
-    pub fn mark_unsupported_hit(&mut self) {
-        self.process.route_stats.unsupported_hits =
-            self.process.route_stats.unsupported_hits.saturating_add(1);
+    pub fn set_ape_endpoint(&mut self, ep: Endpoint) {
+        self.process.ape_endpoint = Some(ep);
     }
 
     pub fn process_state(&self) -> &ApeProcessState {

@@ -9,6 +9,10 @@ build = "build.rs"
 name = "ape"
 crate-type = ["staticlib", "rlib"]
 
+[[bin]]
+name = "libape_daemon"
+path = "src/main.rs"
+
 [dependencies]
 libglenda-rs = { path = "../libglenda-rs" }
 linux-raw-sys = { version = "0.12.1", default-features = false, features = [
